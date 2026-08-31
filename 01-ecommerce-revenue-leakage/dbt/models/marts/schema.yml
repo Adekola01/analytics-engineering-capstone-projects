@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: fct_revenue
+    description: >
+      One row per order. THE single mart both Finance and Ops pull their
+      number from. Finance reads gross_revenue/net_revenue/revenue_recognition_month.
+      Ops reads fulfilled_amount/fulfillment_month/was_fulfilled.
+      See docs/business_metric_definitions.md for the written contract on every column.
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+      - name: net_revenue
+        description: "gross_revenue (deduped settled payment) minus total_refunded. Can legitimately be 0; must never be negative."
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+      - name: cancellation_leakage_amount
+        description: "Cash collected on a cancelled order that was never fully refunded. The engagement's headline finding — must never be negative."
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+  - name: fct_revenue_monthly
+    description: "Finance-ready monthly metrics. One row per calendar month (revenue_recognition_month)."
+    columns:
+      - name: report_month
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_revenue_reconciliation_bridge
+    description: >
+      One row per order-cohort month. Walks Ops' number to Finance's
+      reconciled number through four named, signed adjustments: WIP
+      (charged/not yet shipped), cancellation leakage, duplicate payments,
+      and lifetime refunds. This is the artifact for the board conversation.
+    columns:
+      - name: order_cohort_month
+        tests:
+          - unique
+          - not_null
+
+# The four business-rule (singular) tests live in dbt/tests/ as standalone
+# SQL files, each with its own severity/tags set via {{ config(...) }}
+# inside the file (see docs/data_quality_framework.md for the full list +
+# "what happens when this fails in prod" for each one).

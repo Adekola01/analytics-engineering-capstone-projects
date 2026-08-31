@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "One row per order, lightly cast from RAW_ORDERS. No business logic."
+    columns:
+      - name: order_id
+        description: "Primary key."
+        tests:
+          - unique
+          - not_null
+      - name: order_status
+        tests:
+          - accepted_values:
+              values: ['completed', 'confirmed', 'cancelled', 'placed']
+      - name: order_amount
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: false
+              # A negative/zero order amount is a real data incident (source
+              # system bug), not a trend to tolerate -> default severity: error.
+
+  - name: stg_payments
+    description: "One row per payment attempt, lightly cast from RAW_PAYMENTS."
+    columns:
+      - name: payment_id
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: payment_status
+        tests:
+          - accepted_values:
+              values: ['succeeded', 'failed']
+
+  - name: stg_refunds
+    description: "One row per refund, lightly cast from RAW_REFUNDS."
+    columns:
+      - name: refund_id
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        tests:
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: payment_id
+        tests:
+          - relationships:
+              to: ref('stg_payments')
+              field: payment_id
+      - name: refund_status
+        tests:
+          - accepted_values:
+              values: ['completed']
+
+  - name: stg_shipping
+    description: "One row per shipment, lightly cast from RAW_SHIPPING."
+    columns:
+      - name: shipment_id
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        tests:
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: shipment_status
+        tests:
+          - accepted_values:
+              values: ['delivered', 'in_transit']

@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: stg_patients
+    description: "One row per patient, lightly cast from RAW_PATIENTS."
+    columns:
+      - name: patient_id
+        tests:
+          - unique
+          - not_null
+      - name: sex
+        tests:
+          - accepted_values:
+              values: ['F', 'M', 'X']
+
+  - name: stg_doctors
+    description: "One row per provider, lightly cast from RAW_DOCTORS."
+    columns:
+      - name: doctor_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_appointments
+    description: "One row per booked slot (as emitted, duplicates and misflags included), lightly cast from RAW_APPOINTMENTS."
+    columns:
+      - name: appointment_id
+        tests:
+          - unique
+          - not_null
+      - name: patient_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_patients')
+              field: patient_id
+      - name: doctor_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_doctors')
+              field: doctor_id
+      - name: raw_status
+        tests:
+          - accepted_values:
+              values: ['attended', 'no_show', 'missed', 'no-show', 'cancelled', 'rescheduled']
+
+  - name: stg_billing
+    description: "One row per billed line, lightly cast from RAW_BILLING."
+    columns:
+      - name: billing_id
+        tests:
+          - unique
+          - not_null
+      - name: appointment_id
+        tests:
+          - not_null
+      - name: line_type
+        tests:
+          - accepted_values:
+              values: ['office_visit', 'no_show_fee', 'late_cancel_fee']

@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: fct_loan_performance
+    description: >
+      One row per loan on the active book. THE single mart both Credit Risk
+      and Collections pull their number from. See docs/default_definition.md
+      for the written contract on every column.
+    columns:
+      - name: loan_id
+        tests:
+          - unique
+          - not_null
+      - name: true_dpd
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+      - name: outstanding_balance_estimate
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+  - name: fct_portfolio_metrics
+    description: "One row per product_type plus one 'ALL' row. Risk-ready portfolio metrics."
+    columns:
+      - name: product_type
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_par_reconciliation_bridge
+    description: >
+      One row per product_type plus one 'ALL' row. Walks Collections'
+      reported PAR to ledger-true PAR through three named, signed
+      adjustments. This is the artifact for the CRO/board conversation.
+    columns:
+      - name: product_type
+        tests:
+          - unique
+          - not_null

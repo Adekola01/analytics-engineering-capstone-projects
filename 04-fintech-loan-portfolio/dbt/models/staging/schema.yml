@@ -1,0 +1,72 @@
+version: 2
+
+models:
+  - name: stg_applications
+    description: "One row per loan application, lightly cast from RAW_APPLICATIONS."
+    columns:
+      - name: application_id
+        tests:
+          - unique
+          - not_null
+      - name: decision
+        tests:
+          - accepted_values:
+              values: ['approved', 'declined', 'pending']
+
+  - name: stg_loans
+    description: "One row per funded loan, lightly cast from RAW_LOANS."
+    columns:
+      - name: loan_id
+        tests:
+          - unique
+          - not_null
+      - name: application_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_applications')
+              field: application_id
+      - name: loan_status
+        tests:
+          - accepted_values:
+              values: ['active', 'delinquent', 'restructured', 'closed']
+      - name: principal_amount
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: false
+
+  - name: stg_repayments
+    description: "One row per repayment posting, lightly cast from RAW_REPAYMENTS."
+    columns:
+      - name: repayment_id
+        tests:
+          - unique
+          - not_null
+      - name: loan_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_loans')
+              field: loan_id
+      - name: payment_status
+        tests:
+          - accepted_values:
+              values: ['posted', 'partial', 'missed']
+
+  - name: stg_defaults
+    description: "One row per register entry, lightly cast from RAW_DEFAULTS."
+    columns:
+      - name: default_id
+        tests:
+          - unique
+          - not_null
+      - name: loan_id
+        tests:
+          - relationships:
+              to: ref('stg_loans')
+              field: loan_id
+      - name: default_status
+        tests:
+          - accepted_values:
+              values: ['open', 'in_recovery', 'written_off']

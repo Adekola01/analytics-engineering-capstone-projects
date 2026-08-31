@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: fct_appointments
+    description: >
+      One row per logical visit (reschedule chains collapsed to the root).
+      THE single mart both Clinical Ops and Revenue Cycle pull their number
+      from. See docs/business_metric_definitions.md for the written
+      contract on every column.
+    columns:
+      - name: logical_visit_id
+        tests:
+          - unique
+          - not_null
+      - name: final_canonical_status
+        tests:
+          - accepted_values:
+              values: ['attended', 'no_show', 'cancelled', 'unresolved']
+
+  - name: fct_patient_engagement
+    description: "One row per patient. Engagement/risk metrics for the COO's no-show reduction initiative."
+    columns:
+      - name: patient_id
+        tests:
+          - unique
+          - not_null
+      - name: no_show_risk_segment
+        tests:
+          - accepted_values:
+              values: ['high_risk', 'moderate_risk', 'low_risk', 'no_kept_intent_history']
+
+  - name: fct_noshow_reconciliation_bridge
+    description: >
+      One row per location plus one 'ALL' row. Walks the naive ops-dashboard
+      no-show count to the ledger-true count through three named,
+      subtracted adjustments. This is the artifact for the Clinical
+      Ops / Revenue Cycle defense conversation.
+    columns:
+      - name: location
+        tests:
+          - unique
+          - not_null
