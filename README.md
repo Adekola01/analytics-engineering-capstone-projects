@@ -7,12 +7,12 @@ every definitional decision made along the way.
 
 ## Engagements
 
-| # | Engagement | Domain | Status |
-|---|---|---|---|
-| [01](./01-ecommerce-revenue-leakage) | E-Commerce Revenue Leakage | Retail / Finance | ✅ Complete |
-| [04](./04-fintech-loan-portfolio) | Fintech Loan Portfolio | Lending | ✅ Complete |
-| [05](./05-healthcare-appointment-analytics) | Healthcare Appointment Analytics | Healthcare | ✅ Complete |
-| [08](./08-hr-workforce-analytics) | HR Workforce Analytics | People Ops | 🚧 In progress |
+| # | Engagement | Domain |
+|---|---|---|
+| [01](./01-ecommerce-revenue-leakage) | E-Commerce Revenue Leakage | Retail / Finance 
+| [04](./04-fintech-loan-portfolio) | Fintech Loan Portfolio | Lending 
+| [05](./05-healthcare-appointment-analytics) | Healthcare Appointment Analytics | Healthcare 
+| [08](./08-hr-workforce-analytics) | HR Workforce Analytics | People Ops 
 
 ## What's in each engagement folder
 
@@ -35,6 +35,4 @@ and at least 4 business-rule tests enforcing it never silently regresses.
 ## Validation
 
 Each engagement's own `README.md` has exact commands to run the data
-generator against a Snowflake sandbox and `dbt build` the project. None of
-the numbers in the docs have been validated against a live warehouse yet —
-that's the last step before final submission.
+generator against a Snowflake sandbox and `dbt build` the project.
