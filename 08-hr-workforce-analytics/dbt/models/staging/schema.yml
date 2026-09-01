@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: stg_departments
+    description: "One row per department, lightly cast from RAW_DEPARTMENTS."
+    columns:
+      - name: department_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_employees
+    description: "One row per employment RECORD (not per person), lightly cast from RAW_EMPLOYEES."
+    columns:
+      - name: employee_id
+        tests:
+          - unique
+          - not_null
+      - name: person_id
+        tests:
+          - not_null
+      - name: department_id
+        tests:
+          - relationships:
+              to: ref('stg_departments')
+              field: department_id
+      - name: raw_employment_status
+        tests:
+          - accepted_values:
+              values: ['active', 'terminated', 'transferred']
+
+  - name: stg_performance_reviews
+    description: "One row per review, lightly cast from RAW_PERFORMANCE_REVIEWS."
+    columns:
+      - name: review_id
+        tests:
+          - unique
+          - not_null
+      - name: employee_id
+        tests:
+          - not_null
+      - name: rating
+        tests:
+          - accepted_values:
+              values: ['outstanding', 'exceeds', 'meets', 'below']
+
+  - name: stg_payroll
+    description: "One row per employee per monthly pay period, lightly cast from RAW_PAYROLL."
+    columns:
+      - name: payroll_id
+        tests:
+          - unique
+          - not_null
+      - name: employee_id
+        tests:
+          - not_null
+      - name: currency_code
+        tests:
+          - accepted_values:
+              values: ['USD', 'GBP', 'EUR', 'SGD']
