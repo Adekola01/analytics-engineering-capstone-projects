@@ -18,6 +18,7 @@ docs/
   orchestration_design.md
   exec_summary.md
   deck_outline.md
+  deck.pptx                             <- the actual PowerPoint deck (8-12 slides)
 ```
 
 ## How to validate against your Snowflake sandbox
